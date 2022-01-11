@@ -3,6 +3,7 @@
     "cover 99.5%"
   ],
   "devDependencies": {
+    "alpinejs": "^3.7.1",
     "autoprefixer": "^10.3.1",
     "browser-sync": "^2.27.5",
     "cssnano": "^5.0.7",
