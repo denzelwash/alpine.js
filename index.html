@@ -33,7 +33,10 @@
 <body>
 	<div class="page-wrap" x-data="app()" x-init="init()">
 		<div class="container mx-auto">
-			<form class="form py-5" @submit.prevent="formSubmit">
+			<form class="form py-5" 
+				@submit.prevent="formSubmit"
+				x-show="!formSent"
+			>
 				<h2 class="text-center">Расскажите о себе</h2>
 				<div class="row">
 					<div class="col-md-6 mx-auto">
@@ -65,6 +68,7 @@
 								<input type="text" class="form-control" autocomplete="off" id="input-hobbi" placeholder="Увлечения*"
 									@click="form.hobbi.showSelect = true"
 									@input="form.hobbi.searchHobbi"
+									x-ref="searchInput"
 								>
 								<select class="form-select custom-form-select" multiple aria-label="multiple select"
 									x-show="form.hobbi.showSelect"
@@ -81,21 +85,31 @@
 										></option>
 									</template>
 								</select>
-								<div class="invalid-feedback"></div>
+								<div class="invalid-feedback" 
+									x-show="showErrors && form.hobbi.error" 
+									x-text="form.hobbi.errorMessage"
+								></div>
 							</div>
 						</div>
 						<div class="row">
 							<div class="col-auto">
-								<button class="btn btn-primary">Отправить</button>
+								<button class="btn btn-primary"
+									:disabled="!checkFormFields"
+								>Отправить</button>
 							</div>
 							<div class="col-auto">
-								<button class="btn btn-secondary">Очистить</button>
+								<button class="btn btn-secondary"
+									:disabled="!checkFormFields"
+									@click="init"
+								>Очистить</button>
 							</div>
 						</div>
 					</div>
 				</div>
 			</form>
-			<section class="results py-5">
+			<section class="results py-5"
+				x-show="formSent"
+			>
 				<h2 class="text-center">Результаты</h2>
 				<div class="row">
 					<div class="col-md-6 mx-auto">
@@ -108,19 +122,22 @@
 							<span x-text="form.age.value"></span>
 						</p>
 						<div class="mb-4">
-							Увлечения
+							Увлечения:
 							<ul class="list-group">
 								<template 
-									x-for="item in form.hobbi.selectedValues"
+									x-for="item in form.hobbi.selectedArr"
 									:key="item.id"
 								>
-									<li class="list-group-item" 
+									<li class="list-group-item"
+										x-if="form.hobbi.selectedId.includes()"
 										x-text="item.text"
 									></li>
 								</template>
 							</ul>
 						</div>
-						<button class="btn btn-secondary">редактировать</button>
+						<button class="btn btn-primary"
+							@click="editHandler"
+						>редактировать</button>
 					</div>
 				</div>
 			</section>
@@ -177,6 +194,8 @@ const app = () => {
 			},
 			hobbi: {
 				showSelect: false,
+				errorMessage: '',
+				error: null,
 				values: [
 					{
 						id: 1,
@@ -201,46 +220,89 @@ const app = () => {
 					{
 						id: 6,
 						text: 'бассейн'
-					}
+					},
+					{
+						id: 7,
+						text: 'лыжи'
+					},
+					{
+						id: 8,
+						text: 'картинг'
+					},
+					{
+						id: 9,
+						text: 'скейтборд'
+					},
+					{
+						id: 10,
+						text: 'бег'
+					},
+					{
+						id: 11,
+						text: 'ролики'
+					},
+					{
+						id: 12,
+						text: 'балет'
+					},
 				],
 				tempValues: [],
-				selectedValues: [],
+				selectedId: [],
+				selectedArr() {
+					return this.form.hobbi.tempValues.filter(item => {
+						return this.form.hobbi.selectedId.includes(item.id);
+					})
+				},
 				searchHobbi(e) {
-					// const str = e.target.value;
-					// if (str.length === 0) {
-					// 	this.form.hobbi.tempValues = this.form.hobbi.values;
-					// }
-					// this.form.hobbi.tempValues = this.form.hobbi.tempValues.filter(item => {
-					// 	console.log(item.indexOf(str));
-					// 	if (this.form.hobbi.selectedValues.includes(item)) {
-					// 		return true;
-					// 	} else if (item.indexOf(str) === -1) {
-					// 		return false;
-					// 	}
-					// 	return true;
-					// })
+					this.form.hobbi.tempValues = this.form.hobbi.values;
+					this.form.hobbi.tempValues = this.form.hobbi.tempValues.filter(item => {
+						if (this.form.hobbi.selectedId.includes(item.id)) return true;
+						return item.text.indexOf(e.target.value) === -1 ? false : true;
+					})
 				},
 				eventHandler(e) {
-					const checkedArr = [...this.$refs.select.options].filter(option => option.selected).map(option => +option.value);
-					console.log(checkedArr);
-					this.form.hobbi.selectedValues = this.form.hobbi.values.filter((item) => {
-						return checkedArr.includes(item.id);
-					})
-					console.log(this.form.hobbi.selectedValues);
+					this.form.hobbi.selectedId = [...this.$refs.select.options].filter(option => option.selected).map(option => +option.value);
+					if (this.form.hobbi.selectedId.length === 0) {
+						this.form.hobbi.errorMessage = 'Выберите увлечения';
+						this.form.hobbi.error = true;
+					} else {
+						this.form.hobbi.errorMessage = '';
+						this.form.hobbi.error = false;
+					}
 				}
 			}
 		},
+		formSent: false,
 		formSubmit() {
-			console.log('submit');
 			this.showErrors = true;
+			let error = false;
+			for (item in this.form) {
+				console.log(this.form[item].error);
+				if (this.form[item].error) error = true;
+			}
+			if (error) return;
+			this.formSent = true;
 		},
 		showErrors: false,
+		disableFormButtons: true,
+		get checkFormFields() {
+			return this.form.name.value.length && this.form.age.value.length && this.form.hobbi.selectedId.length;
+		},
+		editHandler() {
+			this.formSent = false;
+			console.log(this.$refs);
+			// this.form.hobbi.selectedId.forEach(item => {
+			// 	console.log(this.$refs.select.querySelector(`option[value=${item}]`));
+			// 	this.$refs.select.querySelector(`option[value=${item}]`).selected = true;
+			// })
+		},
 		init() {
 			for (let key in this.form) {
 				this.form[key].value = '';
 				this.form[key].errorMessage = 'Заполните поле';
 				this.form[key].error = true;
 			}
+			this.showErrors = false;
 			this.form.hobbi.tempValues = JSON.parse(JSON.stringify(this.form.hobbi.values));
 		}
 	}
