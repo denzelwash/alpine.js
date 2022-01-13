@@ -6,6 +6,38 @@ label {
 	cursor: pointer;
 }
 
+.page-wrap {
+	position: relative;
+}
+
+.select-wrapper {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	z-index: 10;
+}
+
+.select-overlay {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 5;
+}
+
 .custom-form-select {
-	display: none;
+	position: absolute;
+	top: 100%;
+	left: 0;
+	width: 100%;
+	min-height: 200px;
+}
+
+.custom-form-select option {
+	cursor: pointer;
+}
+
+.invalid-feedback {
+	display: block;
 }

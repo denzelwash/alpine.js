@@ -2,57 +2,87 @@
 <html lang="ru">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Alpine.js test</title>
-  <meta name="description" content="">
-  <meta name="keywords" content="">
-  <link rel="icon" href="img/favicon.png" type="image/png">
-  <link rel="shortcut icon" href="img/favicon.png" type="image/png">
-  <meta property="og:locale" content="ru_RU">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="">
-  <meta property="og:title" content="">
-  <meta property="og:description" content="">
-  <meta name="image" property="og:image" content="">
-  <meta property="og:image:width" content=""> 
-  <meta property="og:image:height" content="">
-  <meta name="twitter:card" content="summary_large_image">
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Alpine.js test</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+	<link rel="icon" href="img/favicon.png" type="image/png">
+	<link rel="shortcut icon" href="img/favicon.png" type="image/png">
+	<meta property="og:locale" content="ru_RU">
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="">
+	<meta property="og:title" content="">
+	<meta property="og:description" content="">
+	<meta name="image" property="og:image" content="">
+	<meta property="og:image:width" content="">
+	<meta property="og:image:height" content="">
+	<meta name="twitter:card" content="summary_large_image">
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&family=Roboto+Condensed:wght@300&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-  <link rel="stylesheet" href="assets/main.css?ver=1">
+	<link
+		href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500&family=Roboto+Condensed:wght@300&family=Roboto:wght@400;500;700&display=swap"
+		rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
+		integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+	<link rel="stylesheet" href="assets/main.css?ver=1">
+	<script src="//unpkg.com/alpinejs" defer></script>
 </head>
 
 <body>
-  <div class="page-wrap">
-    <div class="container mx-auto"> 
-			<form class="form py-5">
+	<div class="page-wrap" x-data="app()" x-init="init()">
+		<div class="container mx-auto">
+			<form class="form py-5" @submit.prevent="formSubmit">
 				<h2 class="text-center">Расскажите о себе</h2>
 				<div class="row">
 					<div class="col-md-6 mx-auto">
 						<div class="mb-4">
 							<label for="input-name" class="form-label">Имя</label>
-							<input type="text" class="form-control" id="input-name" placeholder="Имя*" required>
-							<div class="invalid-feedback">Заполните поле</div>
+							<input type="text" class="form-control" id="input-name" placeholder="Имя*" 
+								@input="form.name.eventHandler"
+								x-model="form.name.value"
+							>
+							<div class="invalid-feedback" 
+								x-show="showErrors && form.name.error" 
+								x-text="form.name.errorMessage"
+							></div>
 						</div>
 						<div class="mb-4">
 							<label for="input-age" class="form-label">Возраст</label>
-							<input type="number" class="form-control" id="input-age" placeholder="Возраст*" required>
-							<div class="invalid-feedback">Заполните поле</div>
+							<input type="text" class="form-control" id="input-age" placeholder="Возраст*" 
+								@input="form.age.eventHandler"
+								x-model="form.age.value"
+							>
+							<div class="invalid-feedback" 
+								x-show="showErrors && form.age.error" 
+								x-text="form.age.errorMessage"
+							></div>
 						</div>
 						<div class="mb-4">
 							<label for="input-hobbi" class="form-label">Увлечения</label>
-							<input type="text" class="form-control" autocomplete="off" id="input-hobbi" placeholder="Увлечения*" required>
-							<select class="form-select custom-form-select" multiple aria-label="multiple select example" required>
-								<option>Open this select menu</option>
-								<option value="1">One</option>
-								<option value="2">Two</option>
-								<option value="3">Three</option>
-							</select>
-							<div class="invalid-feedback">Выберите увлечения</div>
+							<div class="select-wrapper">
+								<input type="text" class="form-control" autocomplete="off" id="input-hobbi" placeholder="Увлечения*"
+									@click="form.hobbi.showSelect = true"
+									@input="form.hobbi.searchHobbi"
+								>
+								<select class="form-select custom-form-select" multiple aria-label="multiple select"
+									x-show="form.hobbi.showSelect"
+									@change="form.hobbi.eventHandler"
+									x-ref="select"
+								>
+									<template 
+										x-for="item in form.hobbi.tempValues"
+										:key="item.id"
+									>
+										<option
+											:value="item.id"
+											x-text="item.text"
+										></option>
+									</template>
+								</select>
+								<div class="invalid-feedback"></div>
+							</div>
 						</div>
 						<div class="row">
 							<div class="col-auto">
@@ -70,17 +100,24 @@
 				<div class="row">
 					<div class="col-md-6 mx-auto">
 						<p class="mb-4">
-							Имя: 
-							<span></span>
+							Имя:
+							<span x-text="form.name.value"></span>
 						</p>
 						<p class="mb-4">
-							Возраст: 
-							<span></span>
+							Возраст:
+							<span x-text="form.age.value"></span>
 						</p>
 						<div class="mb-4">
 							Увлечения
 							<ul class="list-group">
-								<li class="list-group-item"></li>
+								<template 
+									x-for="item in form.hobbi.selectedValues"
+									:key="item.id"
+								>
+									<li class="list-group-item" 
+										x-text="item.text"
+									></li>
+								</template>
 							</ul>
 						</div>
 						<button class="btn btn-secondary">редактировать</button>
@@ -88,9 +125,127 @@
 				</div>
 			</section>
 		</div>
-  </div>
-	<script src="//unpkg.com/alpinejs" defer></script>
-  <script src="assets/main.js?ver=1"></script>
+		<div class="select-overlay"
+			x-show="form.hobbi.showSelect"
+			@click="form.hobbi.showSelect = false"
+		></div>
+	</div>
+<script>
+const app = () => {
+	return {
+		form: {
+			name: {
+				value: '',
+				errorMessage: '',
+				error: null,
+				eventHandler(e) {
+					const val = e.target.value;
+					this.form.name.value = val;
+					if (val.length === 0) {
+						this.form.name.errorMessage = 'Заполните поле';
+						this.form.name.error = true;
+					} else if (val.length < 2) {
+						this.form.name.errorMessage = 'Имя слишком короткое';
+						this.form.name.error = true;
+					} else {
+						this.form.name.errorMessage = '';
+						this.form.name.error = false;
+					}
+				}
+			},
+			age: {
+				value: '',
+				errorMessage: '',
+				error: null,
+				eventHandler(e) {
+					const val = e.target.value.replace(/[^\d]/g, '');
+					this.form.age.value = val;
+					console.log(val, this.form.age.value);
+					if (val.length === 0) { 
+						this.form.age.errorMessage = 'Заполните поле';
+					} else if (val <= 3) {
+						this.form.age.errorMessage = 'Слишком молодой';
+						this.form.age.error = true;
+					} else if (val >= 100) {
+						this.form.age.errorMessage = 'Слишком Старый';
+						this.form.age.error = true;
+					} else {
+						this.form.age.errorMessage = '';
+						this.form.age.error = false;
+					}
+				}
+			},
+			hobbi: {
+				showSelect: false,
+				values: [
+					{
+						id: 1,
+						text: 'футбол'
+					},
+					{
+						id: 2,
+						text: 'хоккей'
+					},
+					{
+						id: 3,
+						text: 'настольный теннис'
+					},
+					{
+						id: 4,
+						text: 'видеоигры'
+					},
+					{
+						id: 5,
+						text: 'соц. сети'
+					},
+					{
+						id: 6,
+						text: 'бассейн'
+					}
+				],
+				tempValues: [],
+				selectedValues: [],
+				searchHobbi(e) {
+					// const str = e.target.value;
+					// if (str.length === 0) {
+					// 	this.form.hobbi.tempValues = this.form.hobbi.values;
+					// }
+					// this.form.hobbi.tempValues = this.form.hobbi.tempValues.filter(item => {
+					// 	console.log(item.indexOf(str));
+					// 	if (this.form.hobbi.selectedValues.includes(item)) {
+					// 		return true;
+					// 	} else if (item.indexOf(str) === -1) {
+					// 		return false;
+					// 	}
+					// 	return true;
+					// })
+				},
+				eventHandler(e) {
+					const checkedArr = [...this.$refs.select.options].filter(option => option.selected).map(option => +option.value);
+					console.log(checkedArr);
+					this.form.hobbi.selectedValues = this.form.hobbi.values.filter((item) => {
+						return checkedArr.includes(item.id);
+					})
+					console.log(this.form.hobbi.selectedValues);
+				}
+			}
+		},
+		formSubmit() {
+			console.log('submit');
+			this.showErrors = true;
+		},
+		showErrors: false,
+		init() {
+			for (let key in this.form) {
+				this.form[key].value = '';
+				this.form[key].errorMessage = 'Заполните поле';
+				this.form[key].error = true;
+			}
+			this.form.hobbi.tempValues = JSON.parse(JSON.stringify(this.form.hobbi.values));
+		}
+	}
+}
+</script>
 </body>
 
 </html>
