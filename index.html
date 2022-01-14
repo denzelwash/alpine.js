@@ -27,7 +27,7 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
 		integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 	<link rel="stylesheet" href="assets/main.css?ver=1">
-	<script src="//unpkg.com/alpinejs" defer></script>
+	<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 
 <body>
@@ -39,11 +39,11 @@
 			>
 				<h2 class="text-center">Расскажите о себе</h2>
 				<div class="row">
-					<div class="col-md-6 mx-auto">
+					<div class="col-lg-6 mx-auto">
 						<div class="mb-4">
 							<label for="input-name" class="form-label">Имя</label>
-							<input type="text" class="form-control" id="input-name" placeholder="Имя*" 
-								@input="form.name.eventHandler"
+							<input type="text" class="form-control" autocomplete="off" id="input-name" placeholder="Имя*" 
+								@input="form.name.inputEventHandler"
 								x-model="form.name.value"
 							>
 							<div class="invalid-feedback" 
@@ -53,8 +53,8 @@
 						</div>
 						<div class="mb-4">
 							<label for="input-age" class="form-label">Возраст</label>
-							<input type="text" class="form-control" id="input-age" placeholder="Возраст*" 
-								@input="form.age.eventHandler"
+							<input type="text" class="form-control" autocomplete="off" id="input-age" placeholder="Возраст*" 
+								@input="form.age.inputEventHandler"
 								x-model="form.age.value"
 							>
 							<div class="invalid-feedback" 
@@ -65,14 +65,25 @@
 						<div class="mb-4">
 							<label for="input-hobbi" class="form-label">Увлечения</label>
 							<div class="select-wrapper">
-								<input type="text" class="form-control" autocomplete="off" id="input-hobbi" placeholder="Увлечения*"
+								<input type="text" class="form-control" autocomplete="off" id="input-hobbi" placeholder="Поиск"
 									@click="form.hobbi.showSelect = true"
 									@input="form.hobbi.searchHobbi"
 									x-ref="searchInput"
 								>
+								<template
+									x-for="item in form.hobbi.selectedArr"
+									:key="item.id"
+								>
+									<span class="badge bg-primary"
+										x-text="item.text"
+										:data-id="item.id"
+										@click="form.hobbi.badgeClickHandler"
+									></span>
+								</template>
 								<select class="form-select custom-form-select" multiple aria-label="multiple select"
+									x-cloak
 									x-show="form.hobbi.showSelect"
-									@change="form.hobbi.eventHandler"
+									@change="form.hobbi.selectChangeHandler"
 									x-ref="select"
 								>
 									<template 
@@ -85,11 +96,11 @@
 										></option>
 									</template>
 								</select>
-								<div class="invalid-feedback" 
-									x-show="showErrors && form.hobbi.error" 
-									x-text="form.hobbi.errorMessage"
-								></div>
 							</div>
+							<div class="invalid-feedback" 
+								x-show="showErrors && form.hobbi.error" 
+								x-text="form.hobbi.errorMessage"
+							></div>
 						</div>
 						<div class="row">
 							<div class="col-auto">
@@ -100,7 +111,7 @@
 							<div class="col-auto">
 								<button class="btn btn-secondary"
 									:disabled="!checkFormFields"
-									@click="init"
+									@click="formReset"
 								>Очистить</button>
 							</div>
 						</div>
@@ -108,11 +119,12 @@
 				</div>
 			</form>
 			<section class="results py-5"
+				x-cloak
 				x-show="formSent"
 			>
 				<h2 class="text-center">Результаты</h2>
 				<div class="row">
-					<div class="col-md-6 mx-auto">
+					<div class="col-lg-6 mx-auto">
 						<p class="mb-4">
 							Имя:
 							<span x-text="form.name.value"></span>
@@ -136,7 +148,7 @@
 							</ul>
 						</div>
 						<button class="btn btn-primary"
-							@click="editHandler"
+							@click="formSent = false"
 						>редактировать</button>
 					</div>
 				</div>
@@ -155,7 +167,7 @@ const app = () => {
 				value: '',
 				errorMessage: '',
 				error: null,
-				eventHandler(e) {
+				inputEventHandler(e) {
 					const val = e.target.value;
 					this.form.name.value = val;
 					if (val.length === 0) {
@@ -174,17 +186,16 @@ const app = () => {
 				value: '',
 				errorMessage: '',
 				error: null,
-				eventHandler(e) {
+				inputEventHandler(e) {
 					const val = e.target.value.replace(/[^\d]/g, '');
 					this.form.age.value = val;
-					console.log(val, this.form.age.value);
 					if (val.length === 0) { 
 						this.form.age.errorMessage = 'Заполните поле';
 					} else if (val <= 3) {
 						this.form.age.errorMessage = 'Слишком молодой';
 						this.form.age.error = true;
 					} else if (val >= 100) {
-						this.form.age.errorMessage = 'Слишком Старый';
+						this.form.age.errorMessage = 'Слишком cтарый';
 						this.form.age.error = true;
 					} else {
 						this.form.age.errorMessage = '';
@@ -245,6 +256,10 @@ const app = () => {
 						id: 12,
 						text: 'балет'
 					},
+					{
+						id: 13,
+						text: 'большой теннис'
+					}
 				],
 				tempValues: [],
 				selectedId: [],
@@ -260,7 +275,7 @@ const app = () => {
 						return item.text.indexOf(e.target.value) === -1 ? false : true;
 					})
 				},
-				eventHandler(e) {
+				selectChangeHandler(e) {
 					this.form.hobbi.selectedId = [...this.$refs.select.options].filter(option => option.selected).map(option => +option.value);
 					if (this.form.hobbi.selectedId.length === 0) {
 						this.form.hobbi.errorMessage = 'Выберите увлечения';
@@ -269,6 +284,11 @@ const app = () => {
 						this.form.hobbi.errorMessage = '';
 						this.form.hobbi.error = false;
 					}
+				},
+				badgeClickHandler(e) {
+					const id = e.target.getAttribute('data-id');
+					this.form.hobbi.selectedId = this.form.hobbi.selectedId.filter(item => item != id);
+					this.$refs.select.querySelector(`option[value="${id}"]`).selected = false;
 				}
 			}
 		},
@@ -277,24 +297,20 @@ const app = () => {
 			this.showErrors = true;
 			let error = false;
 			for (item in this.form) {
-				console.log(this.form[item].error);
 				if (this.form[item].error) error = true;
 			}
 			if (error) return;
 			this.formSent = true;
 		},
+		formReset() {
+			this.init();
+			const seelectedOptions = this.$refs.select.querySelectorAll('option');
+			seelectedOptions.forEach(option => option.selected = false);
+		},
 		showErrors: false,
 		disableFormButtons: true,
 		get checkFormFields() {
 			return this.form.name.value.length && this.form.age.value.length && this.form.hobbi.selectedId.length;
-		},
-		editHandler() {
-			this.formSent = false;
-			console.log(this.$refs);
-			// this.form.hobbi.selectedId.forEach(item => {
-			// 	console.log(this.$refs.select.querySelector(`option[value=${item}]`));
-			// 	this.$refs.select.querySelector(`option[value=${item}]`).selected = true;
-			// })
 		},
 		init() {
 			for (let key in this.form) {
@@ -304,6 +320,7 @@ const app = () => {
 			}
 			this.showErrors = false;
 			this.form.hobbi.tempValues = JSON.parse(JSON.stringify(this.form.hobbi.values));
+			this.form.hobbi.selectedId = [];
 		}
 	}
 }
