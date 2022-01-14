@@ -276,18 +276,22 @@ const app = () => {
 				},
 				selectChangeHandler(e) {
 					this.form.hobbi.selectedId = [...this.$refs.select.options].filter(option => option.selected).map(option => +option.value);
-					if (this.form.hobbi.selectedId.length === 0) {
-						this.form.hobbi.errorMessage = 'Выберите увлечения';
-						this.form.hobbi.error = true;
-					} else {
-						this.form.hobbi.errorMessage = '';
-						this.form.hobbi.error = false;
-					}
+					this.form.hobbi.checkSelectErrors();
 				},
 				badgeClickHandler(e) {
 					const id = e.target.getAttribute('data-id');
 					this.form.hobbi.selectedId = this.form.hobbi.selectedId.filter(item => item != id);
 					this.$refs.select.querySelector(`option[value="${id}"]`).selected = false;
+					this.form.hobbi.checkSelectErrors();
+				},
+				checkSelectErrors() {
+					if (this.selectedId.length === 0) {
+						this.errorMessage = 'Выберите увлечения';
+						this.error = true;
+					} else {
+						this.errorMessage = '';
+						this.error = false;
+					}
 				}
 			}
 		},
