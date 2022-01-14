@@ -41,8 +41,8 @@
 				<div class="row">
 					<div class="col-lg-6 mx-auto">
 						<div class="mb-4">
-							<label for="input-name" class="form-label">Имя</label>
-							<input type="text" class="form-control" autocomplete="off" id="input-name" placeholder="Имя*" 
+							<label for="input-name" class="form-label">Имя*</label>
+							<input type="text" class="form-control" autocomplete="off" id="input-name" placeholder="Введите имя" 
 								@input="form.name.inputEventHandler"
 								x-model="form.name.value"
 							>
@@ -52,8 +52,8 @@
 							></div>
 						</div>
 						<div class="mb-4">
-							<label for="input-age" class="form-label">Возраст</label>
-							<input type="text" class="form-control" autocomplete="off" id="input-age" placeholder="Возраст*" 
+							<label for="input-age" class="form-label">Возраст*</label>
+							<input type="text" class="form-control" autocomplete="off" id="input-age" placeholder="Введите возраст" 
 								@input="form.age.inputEventHandler"
 								x-model="form.age.value"
 							>
@@ -63,7 +63,7 @@
 							></div>
 						</div>
 						<div class="mb-4">
-							<label for="input-hobbi" class="form-label">Увлечения</label>
+							<label for="input-hobbi" class="form-label">Увлечения*</label>
 							<div class="select-wrapper">
 								<input type="text" class="form-control" autocomplete="off" id="input-hobbi" placeholder="Поиск"
 									@click="form.hobbi.showSelect = true"
@@ -104,14 +104,14 @@
 						</div>
 						<div class="row">
 							<div class="col-auto">
-								<button class="btn btn-primary"
+								<button class="btn btn-primary" type="submit"
 									:disabled="!checkFormFields"
 								>Отправить</button>
 							</div>
 							<div class="col-auto">
 								<button class="btn btn-secondary"
 									:disabled="!checkFormFields"
-									@click="formReset"
+									@click.prevent="formReset"
 								>Очистить</button>
 							</div>
 						</div>
@@ -269,8 +269,7 @@ const app = () => {
 					})
 				},
 				searchHobbi(e) {
-					this.form.hobbi.tempValues = this.form.hobbi.values;
-					this.form.hobbi.tempValues = this.form.hobbi.tempValues.filter(item => {
+					this.form.hobbi.tempValues = this.form.hobbi.values.filter(item => {
 						if (this.form.hobbi.selectedId.includes(item.id)) return true;
 						return item.text.indexOf(e.target.value) === -1 ? false : true;
 					})
