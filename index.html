@@ -82,6 +82,7 @@
 									x-cloak
 									x-show="form.hobbi.showSelect"
 									x-ref="select"
+									@change="form.hobbi.selectChangeHandler"
 								>
 									<template 
 										x-for="item in form.hobbi.tempValues"
@@ -273,20 +274,25 @@ const app = () => {
 					})
 				},
 				selectChangeHandler(e) {
-					const value = +e.target.value;
-					const element = this.$refs.select.querySelector(`option[value="${value}"]`);
-					const offset = this.$refs.select.scrollTop;
-					if (this.form.hobbi.selectedId.includes(value)) {
-						const index = this.form.hobbi.selectedId.indexOf(value);
-						this.form.hobbi.selectedId.splice(index, 1);
+					const mobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent);
+					if (!mobile) {
+						const value = +e.target.value;
+						const element = this.$refs.select.querySelector(`option[value="${value}"]`);
+						const offset = this.$refs.select.scrollTop;
+						if (this.form.hobbi.selectedId.includes(value)) {
+							const index = this.form.hobbi.selectedId.indexOf(value);
+							this.form.hobbi.selectedId.splice(index, 1);
+						} else {
+							this.form.hobbi.selectedId.push(value);
+						}
+						element.selected = !element.selected;
+						setTimeout(() => {
+							this.$refs.select.scrollTop = offset;
+						}, 0);
 					} else {
-						this.form.hobbi.selectedId.push(value);
+						this.form.hobbi.selectedId = [...this.$refs.select.options].filter(option => option.selected).map(option => +option.value);
 					}
-					element.selected = !element.selected;
 					this.form.hobbi.checkSelectErrors();
-					setTimeout(() => {
-						this.$refs.select.scrollTop = offset;
-					}, 0);
 				},
 				badgeClickHandler(e) {
 					const id = e.target.getAttribute('data-id');
