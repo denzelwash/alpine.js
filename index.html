@@ -8,8 +8,6 @@
 	<title>Alpine.js test</title>
 	<meta name="description" content="">
 	<meta name="keywords" content="">
-	<link rel="icon" href="img/favicon.png" type="image/png">
-	<link rel="shortcut icon" href="img/favicon.png" type="image/png">
 	<meta property="og:locale" content="ru_RU">
 	<meta property="og:type" content="website">
 	<meta property="og:url" content="">
@@ -83,7 +81,6 @@
 								<select class="form-select custom-form-select" multiple aria-label="multiple select"
 									x-cloak
 									x-show="form.hobbi.showSelect"
-									@change="form.hobbi.selectChangeHandler"
 									x-ref="select"
 								>
 									<template 
@@ -93,6 +90,7 @@
 										<option
 											:value="item.id"
 											x-text="item.text"
+											@mousedown.prevent="form.hobbi.selectChangeHandler"
 										></option>
 									</template>
 								</select>
@@ -275,8 +273,20 @@ const app = () => {
 					})
 				},
 				selectChangeHandler(e) {
-					this.form.hobbi.selectedId = [...this.$refs.select.options].filter(option => option.selected).map(option => +option.value);
+					const value = +e.target.value;
+					const element = this.$refs.select.querySelector(`option[value="${value}"]`);
+					const offset = this.$refs.select.scrollTop;
+					if (this.form.hobbi.selectedId.includes(value)) {
+						const index = this.form.hobbi.selectedId.indexOf(value);
+						this.form.hobbi.selectedId.splice(index, 1);
+					} else {
+						this.form.hobbi.selectedId.push(value);
+					}
+					element.selected = !element.selected;
 					this.form.hobbi.checkSelectErrors();
+					setTimeout(() => {
+						this.$refs.select.scrollTop = offset;
+					}, 0);
 				},
 				badgeClickHandler(e) {
 					const id = e.target.getAttribute('data-id');
@@ -313,7 +323,7 @@ const app = () => {
 		showErrors: false,
 		disableFormButtons: true,
 		get checkFormFields() {
-			return this.form.name.value.length && this.form.age.value.length && this.form.hobbi.selectedId.length;
+			return this.form.name.value.length || this.form.age.value.length || this.form.hobbi.selectedId.length;
 		},
 		init() {
 			for (let key in this.form) {
