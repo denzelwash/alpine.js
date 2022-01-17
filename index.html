@@ -340,6 +340,7 @@ const app = () => {
 			this.showErrors = false;
 			this.form.hobbi.tempValues = JSON.parse(JSON.stringify(this.form.hobbi.values));
 			this.form.hobbi.selectedId = [];
+			this.$refs.searchInput.value = '';
 		}
 	}
 }
